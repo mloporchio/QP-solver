@@ -1,5 +1,5 @@
 CXX=g++
-CXX_FLAGS= -std=c++17 -O2 -I ./armadillo-9.200.7/include
+CXX_FLAGS= -std=c++17 -O2 -I ./armadillo-9.500.2/include
 LD_FLAGS= -framework Accelerate
 
 .PHONY: cleanall
@@ -7,7 +7,7 @@ LD_FLAGS= -framework Accelerate
 %.o: %.cpp
 	$(CXX) $(CXX_FLAGS) -c $^
 
-qp-solver: main.o
+qp-solver: Problem.o main.o
 	$(CXX) $(LD_FLAGS) $^ -o qp-solver
 
 all: qp-solver
