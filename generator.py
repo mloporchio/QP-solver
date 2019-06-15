@@ -1,6 +1,6 @@
 #
-#   File:		generator.py
-#   Authors:	Matteo Loporchio, Davide Rucci
+#   File:       generator.py
+#   Authors:    Matteo Loporchio, Davide Rucci
 #
 #   This Python 2.7 script can be used to produce random data sets
 #   for our quadratic problem solver. Recall the shape of our optimization
