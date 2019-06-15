@@ -7,7 +7,7 @@ LD_FLAGS= -framework Accelerate
 %.o: %.cpp
 	$(CXX) $(CXX_FLAGS) -c $^
 
-qp-solver: Problem.o main.o
+qp-solver: Utils.o Problem.o main.o
 	$(CXX) $(LD_FLAGS) $^ -o qp-solver
 
 all: qp-solver

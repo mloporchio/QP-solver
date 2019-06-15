@@ -7,40 +7,24 @@
 
 #include "Problem.hpp"
 
-// Loads problem data from a set of CSV files.
-QProblem load(std::string path, std::string name) {
-    // Build the names.
-    std::stringstream name1, name2, name3;
-    name1 << path << "/" << name << "_Q.csv";
-    name2 << path << "/" << name << "_A.csv";
-    name3 << path << "/" << name << "_u.csv";
-    // Load Q, A and q from the CSV files.
-    arma::mat Q, A;
-    arma::vec q;
-    Q.load(name1.str(), arma::csv_ascii);
-    A.load(name2.str(), arma::csv_ascii);
-    q.load(name3.str(), arma::csv_ascii);
-    // Build the vector b.
-    arma::vec b(A.n_rows, arma::fill::ones);
-    QProblem p = {Q, q, A, b};
-    return p;
-}
-
 // Check if a vector falls in the feasible region of the problem.
 bool isFeasible(const arma::mat &A, const arma::vec &b, const arma::vec &x,
 double tol) {
     return arma::approx_equal(A * x, b, "absdiff", tol);
 }
 
-// Returns true if x is close to zero with a given tolerance.
-// Many thanks to:
-// https://stackoverflow.com/questions/6982217/how-do-i-check-and-handle-numbers-very-close-to-zero
+// This function returns true if x is close to zero with a given tolerance.
+// Many thanks to: https://stackoverflow.com/questions/6982217/how-do-i-check-and-handle-numbers-very-close-to-zero
 bool isCloseToZero(double x, double tol) {
     return std::abs(x) < tol; //std::numeric_limits<double>::epsilon();
 }
 
 // Solves the direction-finding problem at each step of the PGM.
-arma::vec solveDFP(const arma::mat &A, const arma::vec &grad) {
+arma::vec solveDFP(
+    const arma::mat &Q,
+    const arma::mat &A,
+    const arma::vec &grad
+){
     arma::uword k = A.n_rows, n = A.n_cols;
     // Build the matrix U.
     //
@@ -48,8 +32,8 @@ arma::vec solveDFP(const arma::mat &A, const arma::vec &grad) {
     //  U = |         |
     //      | A   0   |
     //
-    arma::mat I = arma::eye(n, n);
-    arma::mat X = arma::join_rows(I, A.t());
+    //arma::mat I = arma::eye(n, n);
+    arma::mat X = arma::join_rows(Q, A.t());
     arma::mat Y = arma::join_rows(A, arma::zeros(k, k));
     arma::mat U = arma::join_cols(X, Y);
     // Build the vector v.
@@ -82,25 +66,25 @@ double lineSearch(
 }
 
 // Main implementation of the projected gradient method.
-arma::vec PGM(
+QResult PGM(
     QProblem p,
-    int maxIter,
+    unsigned int maxIter,
     double alphaInit,
     double tau,
     double beta,
     double tol
 ){
+    unsigned int k = 0;
+    std::vector<double> history;
     // Initialize x with a point in the feasible region.
     arma::vec x = arma::solve(p.A, p.b);
-    int k = 0;
     while (k < maxIter) {
         // Compute the value of the function.
-        double v = p.f(x);
-        //std::cout << "v = " << v << std::endl;
+        history.push_back(p.f(x));
         // Compute the gradient.
         arma::vec g = p.gf(x);
         // Solve the DFP.
-        arma::vec d = solveDFP(p.A, g);
+        arma::vec d = solveDFP(p.Q, p.A, g);
         // Compute the dot product g * d.
         // If it is zero, then stop because x is a KKT point.
         if (isCloseToZero(arma::dot(g, d), tol)) break;
@@ -111,6 +95,5 @@ arma::vec PGM(
         // Increment the iteration counter.
         k++;
     }
-    std::cout << "Converged at iteration = " << k << std::endl;
-    return x;
+    return {x, k, history};
 }

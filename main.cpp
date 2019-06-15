@@ -6,6 +6,7 @@
 */
 
 #include "Problem.hpp"
+#include "Utils.hpp"
 #include <iostream>
 
 #define DEFAULT_PATH "./data"
@@ -21,7 +22,7 @@ int main(int argc, char **argv) {
     // Name of the data set.
     std::string name(argv[1]);
     // Maximum number of iterations.
-    int maxIter = atoi(argv[2]);
+    unsigned int maxIter = ((unsigned int) atoi(argv[2]));
     // Line search parameters.
     double alphaInit = atof(argv[3]);
     double tau = atof(argv[4]);
@@ -29,10 +30,13 @@ int main(int argc, char **argv) {
     // Floating-point tolerance.
     double tol = atof(argv[6]);
     // Load the problem from file.
-    QProblem r = load(DEFAULT_PATH, name);
-    arma::vec z = PGM(r, maxIter, alphaInit, tau, beta, tol);
-    std::cout << "Solution = " << z.t();
-    std::cout << "Value = " << r.f(z) << std::endl;
-    std::cout << "Feasible = " << isFeasible(r.A, r.b, z, tol) << std::endl;
+    QProblem p = load(DEFAULT_PATH, name);
+    QResult r = PGM(p, maxIter, alphaInit, tau, beta, tol);
+    std::cout << "Solution\t: " << r.x.t();
+    std::cout << "Value\t\t: " << p.f(r.x) << std::endl;
+    std::cout << "Iteration\t: " << r.nIter << std::endl;
+    std::cout << "Feasible\t: " << isFeasible(p.A, p.b, r.x, tol) << std::endl;
+    //
+    toFile(r.history, "data/history.csv");
     return 0;
 }
