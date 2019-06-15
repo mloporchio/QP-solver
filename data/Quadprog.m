@@ -7,9 +7,9 @@
 %   to assess the quality of our C++ implementation.
 %   
 
-Q = csvread('data_Q.csv',0,0);
-A = csvread('data_A.csv',0,0);
-u = csvread('data_u.csv',0,0);
+Q = csvread('data_Q.csv', 0, 0);
+A = csvread('data_A.csv', 0, 0);
+u = csvread('data_u.csv', 0, 0);
 b = ones(size(A, 1), 1);
-Qp = 2 * Q;
-x = quadprog(Qp,u,[],[],A,b,[],[]);
+
+quadprog(2 * Q, u, [], [], A, b, [], [])
