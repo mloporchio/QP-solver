@@ -19,28 +19,23 @@ bool isCloseToZero(double x, double tol) {
     return std::abs(x) < tol; //std::numeric_limits<double>::epsilon();
 }
 
-// Solves the direction-finding problem at each step of the PGM.
-arma::vec solveDFP(
-    const arma::mat &Q,
-    const arma::mat &A,
-    const arma::vec &grad
-){
+// Builds the matrix for the direction-finding problem.
+arma::mat DFPMatrix(const arma::mat &Q, const arma::mat &A) {
     arma::uword k = A.n_rows, n = A.n_cols;
-    // Build the matrix U.
-    //
-    //      | I  A^T  |
-    //  U = |         |
-    //      | A   0   |
-    //
-    //arma::mat I = arma::eye(n, n);
-    arma::mat X = arma::join_rows(Q, A.t());
-    arma::mat Y = arma::join_rows(A, arma::zeros(k, k));
-    arma::mat U = arma::join_cols(X, Y);
+    return arma::join_cols(
+        arma::join_rows(Q, A.t()),              //  Q   A^T
+        arma::join_rows(A, arma::zeros(k, k))   //  A    0
+    );
+}
+
+// Solves the direction-finding problem at each step of the PGM.
+arma::vec solveDFP(const arma::mat &M, const arma::vec &grad){
+    arma::uword n = grad.n_elem;
     // Build the vector v.
-    arma::vec v(n+k, arma::fill::zeros);
-    for (arma::uword i = 0; i < grad.n_elem; i++) v(i) = -grad(i);
-    // Solve the system Uy = v.
-    arma::vec y = arma::solve(U, v);
+    arma::vec v(M.n_rows, arma::fill::zeros);
+    for (arma::uword i = 0; i < n; i++) v(i) = -grad(i);
+    // Solve the system My = v.
+    arma::vec y = arma::solve(M, v);
     // Build the final result.
     return y.subvec(0, n-1);
 }
@@ -78,13 +73,15 @@ QResult PGM(
     std::vector<double> history;
     // Initialize x with a point in the feasible region.
     arma::vec x = arma::solve(p.A, p.b);
+    // Build the DFP matrix.
+    arma::mat M = DFPMatrix(p.Q, p.A);
     while (k < maxIter) {
         // Compute the value of the function.
         history.push_back(p.f(x));
         // Compute the gradient.
         arma::vec g = p.gf(x);
         // Solve the DFP.
-        arma::vec d = solveDFP(p.Q, p.A, g);
+        arma::vec d = solveDFP(M, g);
         // Compute the dot product g * d.
         // If it is zero, then stop because x is a KKT point.
         if (isCloseToZero(arma::dot(g, d), tol)) break;

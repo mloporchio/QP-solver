@@ -52,9 +52,11 @@ double tol);
 // Returns true if x is close to zero with a given tolerance.
 bool isCloseToZero(double x, double tol);
 
+// Builds the matrix for the direction-finding problem.
+arma::mat DFPMatrix(const arma::mat &Q, const arma::mat &A);
+
 // Solves the direction-finding problem at each step of the PGM.
-arma::vec solveDFP(const arma::mat &Q, const arma::mat &A,
-const arma::vec &grad);
+arma::vec solveDFP(const arma::mat &M, const arma::vec &grad);
 
 // Performs a line search to find the step size.
 // The currently implemented strategy is Armijo's with backtracking.

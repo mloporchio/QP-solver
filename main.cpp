@@ -37,6 +37,6 @@ int main(int argc, char **argv) {
     std::cout << "Iteration\t: " << r.nIter << std::endl;
     std::cout << "Feasible\t: " << isFeasible(p.A, p.b, r.x, tol) << std::endl;
     //
-    toFile(r.history, "data/history.csv");
+    //toFile(r.history, "data/history.csv");
     return 0;
 }

@@ -1,5 +1,5 @@
 %   
-%   File:   quadprog.m
+%   File:   Quadprog.m
 %   Author: Matteo Loporchio
 %
 %   In this file we try to solve our problem using Matlab's 
@@ -12,4 +12,5 @@ A = csvread('data_A.csv', 0, 0);
 u = csvread('data_u.csv', 0, 0);
 b = ones(size(A, 1), 1);
 
-quadprog(2 * Q, u, [], [], A, b, [], [])
+[x, v] = quadprog(2 * Q, u, [], [], A, b, [], []);
+
