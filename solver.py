@@ -66,10 +66,16 @@ def lineSearch(P, a_0, t, b, x, g, d):
     return a
 
 def simplex_proj(a, y):
+    """
+    Projection of point x onto a generic simplex a^T * x = 1, x >= 0.
+    Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
+
+    TODO: simplify this implementation!
+    """
     l = np.divide(y, a, out=np.zeros_like(y), where=(a > 0))
     idx = np.argsort(l)
     d = len(l)
-    evalpL = lambda k: np.sum(a[idx[k:]]*(y[idx[k:]] - l[idx[k]]*a[idx[k:]]) ) -1
+    evalpL = lambda k: np.sum(a[idx[k:]]*(y[idx[k:]] - l[idx[k]]*a[idx[k:]]))-1
     def bisectsearch():
         idxL, idxH = 0, d-1
         L = evalpL(idxL)
