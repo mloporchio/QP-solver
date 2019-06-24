@@ -10,7 +10,7 @@ import sys
 import numpy as np
 import scipy as sp
 from scipy.optimize import linprog
-from numpy.linalg import norm, inv
+from numpy.linalg import norm
 
 class QProblem:
     """
@@ -28,7 +28,7 @@ class QProblem:
         self.b = np.ones(np.size(self.A, 0))
 
     def f(self, x):
-        """This is the objective function of the problem."""
+        """This is the objective function f(x) of the problem."""
         r = np.dot(self.Q, x)
         return np.inner(x, r) + np.inner(self.q, x)
 
@@ -65,32 +65,34 @@ def lineSearch(P, a_0, t, b, x, g, d):
     while (P.f(x + a * d) > P.f(x) + a * b * z): a *= t
     return a
 
-def simplex_proj(a, y):
+def binary_search(a, x, u, i):
+    """
+    Utility function that performs an (implicit) binary search for the
+    simplex projection.
+    Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
+    """
+    fun = lambda k: np.sum(a[i[k:]] * (x[i[k:]] - u[i[k]] * a[i[k:]])) - 1
+    low, high = 0, len(u) - 1
+    L = fun(low)
+    H = fun(high)
+    if (L < 0): return low
+    while ((high - low) > 1):
+        mid = int((low + high) / 2)
+        M = fun(mid)
+        if (M > 0): low, L = mid, M
+        else: high, H = mid, M
+    return high
+
+def simplex_proj(a, x):
     """
     Projection of point x onto a generic simplex a^T * x = 1, x >= 0.
     Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
-
-    TODO: simplify this implementation!
     """
-    l = np.divide(y, a, out=np.zeros_like(y), where=(a > 0))
-    idx = np.argsort(l)
-    d = len(l)
-    evalpL = lambda k: np.sum(a[idx[k:]]*(y[idx[k:]] - l[idx[k]]*a[idx[k:]]))-1
-    def bisectsearch():
-        idxL, idxH = 0, d-1
-        L = evalpL(idxL)
-        H = evalpL(idxH)
-        if L<0: return idxL
-        while (idxH-idxL)>1:
-            iMid = int((idxL+idxH)/2)
-            M = evalpL(iMid)
-            if M>0: idxL, L = iMid, M
-            else: idxH, H = iMid, M
-        return idxH
-    k = bisectsearch()
-    lam = (np.sum(a[idx[k:]]*y[idx[k:]])-1)/np.sum(a[idx[k:]])
-    x = np.maximum(0, y-lam*a)
-    return x
+    u = np.divide(x, a, out=np.zeros_like(x), where=(a > 0))
+    i = np.argsort(u)
+    k = binary_search(a, x, u, i)
+    l = (np.sum(a[i[k:]] * x[i[k:]]) - 1) / np.sum(a[i[k:]])
+    return np.maximum(0, x - l * a)
 
 def project(P, x):
     """
@@ -99,13 +101,11 @@ def project(P, x):
     fproj = lambda v: simplex_proj(v, x)
     return np.sum(np.apply_along_axis(fproj, 1, P.A), axis=0)
 
-
 def stopping(x, d, tol):
     """
     Implements the stopping criterion of the PGM.
     """
     return np.allclose(x, d, atol=tol)
-
 
 def PGM(P, x0, a0, t, b, tol, max_it):
     """
