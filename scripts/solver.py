@@ -9,7 +9,6 @@
 import sys
 import numpy as np
 import scipy as sp
-from scipy.optimize import linprog
 from numpy.linalg import norm
 
 class QProblem:
@@ -44,6 +43,13 @@ class QProblem:
         y = np.dot(self.A, x)
         return (np.allclose(y, self.b, atol=tol) and np.alltrue(x >= 0))
 
+    def initialPoint(self):
+        """Returns a starting point for the PGM."""
+        result = np.zeros_like(self.q)
+        idx = []
+        for row in self.A: idx.append((np.nonzero(row))[0][0])
+        result[idx] = 1
+        return result
 
 def loadProblem(path):
     """Loads a problem from a set of CSV files."""
@@ -52,11 +58,6 @@ def loadProblem(path):
     q = np.loadtxt(path + '_u.csv', delimiter=',')
     return QProblem(Q, q, A)
 
-def initialPoint(P):
-    """Returns a starting point for the PGM by solving a linear program."""
-    c = np.ones(np.size(P.Q, 0))
-    res = linprog(c, A_eq = P.A, b_eq = P.b, bounds=((0, None)))
-    return res.x
 
 def lineSearch(P, a_0, t, b, x, g, d):
     """Performs backtracking line search using Armijo."""
@@ -132,7 +133,7 @@ def main():
     beta = float(sys.argv[5])
     tol = 1e-12
     P = loadProblem(path)
-    x0 = initialPoint(P)
+    x0 = P.initialPoint()
     result = PGM(P, x0, a0, tau, beta, tol, max_it)
     print 'Solution\t=', result[0]
     print 'Feasible\t=', P.feasible(result[0], tol)
