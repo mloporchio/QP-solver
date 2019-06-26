@@ -66,19 +66,6 @@ struct QResult {
 double lineSearch(QProblem &P, double alpha_0, double tau, double beta,
 const arma::vec &x, const arma::vec &g, const arma::vec &d);
 
-// Utility function that performs an (implicit) binary search for the
-// simplex projection.
-// Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
-arma::uword binary_search(const arma::vec &a, const arma::vec &x,
-const arma::vec &u, const arma::vec &idx);
-
-// Projection of point x onto a generic simplex a^T * x = 1, x >= 0.
-// Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
-arma::vec simplex_proj(const arma::vec &a, const arma::vec &x);
-
-// Projects a point x onto the feasible region of the problem P.
-arma::vec project(QProblem &P, const arma::vec &x);
-
 // Implements the stopping criterion of the PGM.
 bool stopping(const arma::vec &x, const arma::vec &d,
 double atol = ABS_TOL, double rtol = REL_TOL);
