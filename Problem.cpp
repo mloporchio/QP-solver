@@ -8,7 +8,7 @@
 #include "Problem.hpp"
 
 // Performs a line search to find the step size.
-double lineSearch(QProblem P, double alpha_0, double tau, double beta,
+double lineSearch(QProblem &P, double alpha_0, double tau, double beta,
 const arma::vec &x, const arma::vec &g, const arma::vec &d) {
     double alpha = alpha_0;
     double z = arma::dot(g, d);
@@ -16,7 +16,7 @@ const arma::vec &x, const arma::vec &g, const arma::vec &d) {
     return alpha;
 }
 
-// Utility function that performs an (implicit) binary search for the
+// Utility function that performs an implicit binary search for the
 // simplex projection.
 // Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
 arma::uword binary_search(const arma::vec &a, const arma::vec &x,
@@ -67,12 +67,9 @@ arma::vec simplex_proj(const arma::vec &a, const arma::vec &x) {
 }
 
 // Projects a point x onto the feasible region of the problem P.
-arma::vec project(QProblem P, const arma::vec &x) {
+arma::vec project(QProblem &P, const arma::vec &x) {
     arma::vec result = arma::zeros(x.n_elem);
-    for (arma::uword i = 0; i < P.A.n_rows; i++) {
-        arma::vec r = (P.A.row(i)).t();
-        result += simplex_proj(r, x);
-    }
+    P.A.each_row([&](arma::rowvec &v) {result += simplex_proj(v.t(), x);});
     return result;
 }
 
@@ -83,7 +80,7 @@ double rtol) {
 }
 
 // This is the implementation of the projected gradient method.
-QResult PGM(QProblem P, const arma::vec &x_0, double alpha_0, double tau,
+QResult PGM(QProblem &P, const arma::vec &x_0, double alpha_0, double tau,
 double beta, unsigned int max_iter, double atol, double rtol) {
     unsigned int k = 0;
     arma::vec x = x_0;

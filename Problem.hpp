@@ -47,10 +47,10 @@ struct QProblem {
     // Returns a random point inside the feasible region of the problem.
     arma::vec initialPoint() {
         arma::vec result = arma::zeros(q.n_elem);
-        for (arma::uword i = 0; i < A.n_rows; i++) {
-            arma::uvec idx = arma::find(A.row(i), 1, "first");
+        A.each_row([&](arma::rowvec &v) {
+            arma::uvec idx = arma::find(v, 1, "first");
             result(idx(0)) = 1;
-        }
+        });
         return result;
     }
 };
@@ -63,7 +63,7 @@ struct QResult {
 };
 
 // Performs a line search to find the step size.
-double lineSearch(QProblem P, double alpha_0, double tau, double beta,
+double lineSearch(QProblem &P, double alpha_0, double tau, double beta,
 const arma::vec &x, const arma::vec &g, const arma::vec &d);
 
 // Utility function that performs an (implicit) binary search for the
@@ -77,14 +77,14 @@ const arma::vec &u, const arma::vec &idx);
 arma::vec simplex_proj(const arma::vec &a, const arma::vec &x);
 
 // Projects a point x onto the feasible region of the problem P.
-arma::vec project(QProblem P, const arma::vec &x);
+arma::vec project(QProblem &P, const arma::vec &x);
 
 // Implements the stopping criterion of the PGM.
 bool stopping(const arma::vec &x, const arma::vec &d,
 double atol = ABS_TOL, double rtol = REL_TOL);
 
 // This is the main implementation of the projected gradient method.
-QResult PGM(QProblem P, const arma::vec &x_0, double alpha_0, double tau,
+QResult PGM(QProblem &P, const arma::vec &x_0, double alpha_0, double tau,
 double beta, unsigned int max_iter, double atol = ABS_TOL,
 double rtol = REL_TOL);
 
