@@ -5,8 +5,15 @@
     Computational Mathematics for Learning and Data Analysis 2018/2019
 */
 
+#include <cmath>
 #include "Projection.hpp"
 
+// Checks if a vector x is on the unit simplex.
+bool on_unit_simplex(const arma::vec &x, double eps) {
+    return ((abs(arma::accu(x) - 1) < eps) && arma::all(x >= 0));
+}
+
+/*
 // Utility function that performs an implicit binary search for the
 // simplex projection.
 // Many thanks to: http://www.mcduplessis.com/index.php/2016/08/22/fast-projection-onto-a-simplex-python/
@@ -57,8 +64,20 @@ arma::vec generic_simplex_proj(const arma::vec &a, const arma::vec &x) {
     return arma::max(z, x - l * a);
 }
 
+// Projects a point x onto the feasible region of the problem P.
+arma::vec project_full(QProblem &P, const arma::vec &x) {
+    arma::vec result = arma::zeros(x.n_elem);
+    P.A.each_row([&](arma::rowvec &v) {
+        result += generic_simplex_proj(v.t(), x);
+    });
+    return result;
+}
+*/
+
 // Projection of point x onto the unit simplex using sorting.
 arma::vec sorting_unit_simplex_proj(const arma::vec &x) {
+    // Check if x is already on the simplex.
+    if (on_unit_simplex(x)) return x;
     arma::uword k = 0;
     arma::vec u = arma::sort(x, "descend");
     arma::vec c = arma::cumsum(u);
@@ -71,6 +90,8 @@ arma::vec sorting_unit_simplex_proj(const arma::vec &x) {
 
 // Projection of point x onto the unit simplex using Michelot's algorithm.
 arma::vec michelot_unit_simplex_proj(const arma::vec &x) {
+    // Check if x is already on the simplex.
+    if (on_unit_simplex(x)) return x;
     arma::vec v = x;
     arma::uword prev_size = 0;
     double rho = (arma::sum(x) - 1) / x.n_elem;
@@ -81,17 +102,8 @@ arma::vec michelot_unit_simplex_proj(const arma::vec &x) {
         rho = (arma::sum(v) - 1) / v.n_elem;
     }
     double t = rho;
-    arma::uword k = v.n_elem;
+    //arma::uword k = v.n_elem;
     return arma::max(arma::zeros(x.n_elem), x - t);
-}
-
-// Projects a point x onto the feasible region of the problem P.
-arma::vec project_full(QProblem &P, const arma::vec &x) {
-    arma::vec result = arma::zeros(x.n_elem);
-    P.A.each_row([&](arma::rowvec &v) {
-        result += generic_simplex_proj(v.t(), x);
-    });
-    return result;
 }
 
 // Projects a point x onto the feasible region of the problem P.

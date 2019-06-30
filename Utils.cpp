@@ -5,11 +5,11 @@
     Computational Mathematics for Learning and Data Analysis 2018/2019
 */
 
-#include "Utils.hpp"
 #define ARMA_DONT_USE_WRAPPER
 #include <armadillo>
 #include <iostream>
 #include <fstream>
+#include "Utils.hpp"
 
 // Loads problem data from a set of CSV files.
 QProblem load(std::string path) {
@@ -19,8 +19,7 @@ QProblem load(std::string path) {
     name2 << path << "_A.csv";
     name3 << path << "_u.csv";
     // Load Q, A and q from the CSV files.
-    arma::mat Q, A;
-    arma::vec q;
+    arma::mat Q, A; arma::vec q;
     Q.load(name1.str(), arma::csv_ascii);
     A.load(name2.str(), arma::csv_ascii);
     q.load(name3.str(), arma::csv_ascii);
