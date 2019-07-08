@@ -6,14 +6,15 @@
 */
 
 #include "Problem.hpp"
+#include "Initial.hpp"
 #include "Utils.hpp"
 #include <iostream>
 
 int main(int argc, char **argv) {
     // Read the parameters.
-    if (argc < 6) {
+    if (argc < 3) {
         std::cerr << "Usage:" << std::endl
-        << argv[0] << " <name> <max_iter> <alpha_0> <tau> <beta>"
+        << argv[0] << " <name> <max_iter>"
         << std::endl;
         return 1;
     }
@@ -21,16 +22,12 @@ int main(int argc, char **argv) {
     std::string path(argv[1]);
     // Maximum number of iterations.
     unsigned int max_iter = ((unsigned int) atoi(argv[2]));
-    // Line search parameters.
-    double alpha_0 = atof(argv[3]);
-    double tau = atof(argv[4]);
-    double beta = atof(argv[5]);
     // Load the problem from file.
     QProblem P = load(path);
     // Set the initial point for the PGM.
-    arma::vec x_0 = P.initialPoint();
+    arma::vec x_0 = initial_point_first(P);
     // Solve the problem.
-    QResult R = PGM(P, x_0, alpha_0, tau, beta, max_iter);
+    QResult R = PGM(P, x_0, max_iter);
     // Print the results.
     std::cout << "Solution\t: " << R.x.t();
     std::cout << "Value\t\t: " << P.f(R.x) << std::endl;

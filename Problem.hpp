@@ -43,16 +43,6 @@ struct QProblem {
         return (arma::approx_equal(A * x, b, "both", atol, rtol) &&
         arma::all(x >= 0));
     }
-
-    // Returns a random point inside the feasible region of the problem.
-    arma::vec initialPoint() {
-        arma::vec result = arma::zeros(q.n_elem);
-        A.each_row([&](arma::rowvec &v) {
-            arma::uvec idx = arma::find(v, 1, "first");
-            result(idx(0)) = 1;
-        });
-        return result;
-    }
 };
 
 // This struct contains the output of the PGM.
@@ -63,16 +53,15 @@ struct QResult {
 };
 
 // Performs a line search to find the step size.
-double lineSearch(QProblem &P, double alpha_0, double tau, double beta,
-const arma::vec &x, const arma::vec &g, const arma::vec &d);
+double line_search(QProblem &P, const arma::vec &g, const arma::vec &d,
+double atol = ABS_TOL, double rtol = REL_TOL);
 
 // Implements the stopping criterion of the PGM.
 bool stopping(const arma::vec &x, const arma::vec &d,
 double atol = ABS_TOL, double rtol = REL_TOL);
 
 // This is the main implementation of the projected gradient method.
-QResult PGM(QProblem &P, const arma::vec &x_0, double alpha_0, double tau,
-double beta, unsigned int max_iter, double atol = ABS_TOL,
-double rtol = REL_TOL);
+QResult PGM(QProblem &P, const arma::vec &x_0, unsigned int max_iter,
+double s = 1, double atol = ABS_TOL, double rtol = REL_TOL);
 
 #endif

@@ -13,6 +13,6 @@
 // Relative tolerance for feasibility checks.
 #define REL_TOL 1E-5
 // Default value for the maximum number of iterations.
-#define MAX_ITER 1000
+// #define MAX_ITER 1000
 
 #endif

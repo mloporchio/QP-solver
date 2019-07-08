@@ -14,6 +14,5 @@ function v = test(id)
     u = csvread(strcat(name, '_u.csv'), 0, 0);
     b = ones(size(A, 1), 1);
     z = zeros(size(Q, 1), 1);
-    [~, val] = quadprog(2 * Q, u, [], [], A, b, z, []);
-    v = val;
+    [~, v] = quadprog(2 * Q, u, [], [], A, b, z, []);
 end
