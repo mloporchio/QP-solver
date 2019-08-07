@@ -10,6 +10,7 @@
 
 #define ARMA_DONT_USE_WRAPPER
 #include <armadillo>
+#include <optional>
 #include "Config.hpp"
 
 /*
@@ -37,11 +38,21 @@ struct QProblem {
         return 2 * (Q * x) + q;
     }
 
-    // Check if a vector falls in the feasible region of the problem.
-    bool isFeasible(const arma::vec &x, double atol = ABS_TOL,
-    double rtol = REL_TOL) {
-        return (arma::approx_equal(A * x, b, "both", atol, rtol) &&
-        arma::all(x >= 0));
+    // This method checks if a point is in the feasible region of the problem.
+    bool isFeasible(const arma::vec &x, double eps) {
+        return (arma::approx_equal(A * x, b, "absdiff", eps) &&
+        arma::all(x >= -eps));
+    }
+
+    // Returns a feasible starting point where each component
+    // of a partition S is equal to 1 / # of elements in S.
+    arma::vec initial_point() {
+        arma::vec result = arma::zeros(q.n_elem);
+        A.each_row([&](arma::rowvec &v) {
+            arma::uvec idx = arma::find(v > 0);
+            result(idx).fill(1.0 / ((double) idx.n_elem));
+        });
+        return result;
     }
 };
 
@@ -49,19 +60,15 @@ struct QProblem {
 struct QResult {
     arma::vec x; // Solution.
     double v; // Optimal value.
-    unsigned int n_iter; // Total number of iterations of the PGM.
+    arma::uword n_iter; // Total number of iterations of the PGM.
 };
 
-// Performs a line search to find the step size.
-double line_search(QProblem &P, const arma::vec &g, const arma::vec &d,
-double atol = ABS_TOL, double rtol = REL_TOL);
+// Computes the maximum feasible stepsize.
+double max_step(const arma::vec &x, const arma::vec &d, const arma::uvec &act,
+double eps);
 
-// Implements the stopping criterion of the PGM.
-bool stopping(const arma::vec &x, const arma::vec &d,
-double atol = ABS_TOL, double rtol = REL_TOL);
-
-// This is the main implementation of the projected gradient method.
-QResult PGM(QProblem &P, const arma::vec &x_0, unsigned int max_iter,
-double s = 1, double atol = ABS_TOL, double rtol = REL_TOL);
+// This is the implementation of the projected gradient method.
+QResult PGM(QProblem &P, const arma::vec &x_0, arma::uword max_iter,
+double tol_cnst, double tol_opt);
 
 #endif

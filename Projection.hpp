@@ -3,25 +3,25 @@
     Authors:    Matteo Loporchio, Davide Rucci
 
     Computational Mathematics for Learning and Data Analysis 2018/2019
-
-    This file contains the definition of several algorithms that can be used
-    to project a point onto the feasible region of our optimization problem.
 */
 
 #ifndef PROJECTION_H
 #define PROJECTION_H
 
-#define ARMA_DONT_USE_WRAPPER
-#include <armadillo>
 #include "Problem.hpp"
 
-// Checks if a vector x is on the unit simplex.
-bool on_unit_simplex(const arma::vec &x, double eps = ABS_TOL);
+// Computes the projection of a vector onto the subspace A_bar * d = 0.
+// This method uses Armadillo's solver for systems of linear equations.
+arma::vec project_auto(const arma::mat &A_bar, const arma::vec &x);
 
-// Projection of point x onto the unit simplex using sorting.
-arma::vec sorting_unit_simplex_proj(const arma::vec &x);
+// Computes the projection of a vector onto the subspace A_bar * d = 0.
+// This method explicitly computes the projection matrix.
+arma::vec project_mat(const arma::mat &A_bar, const arma::vec &x);
 
-// Projects a point x onto the feasible region of the problem P.
-arma::vec project(QProblem &P, const arma::vec &x);
+// Computes the projection of a vector onto the subspace A_bar * d = 0.
+arma::vec project_block(QProblem &P, const arma::uvec &act, const arma::vec &g);
+
+// Projects the gradient onto the single block of coordinates.
+arma::vec sub_proj(const arma::vec &g, const arma::uvec &act);
 
 #endif

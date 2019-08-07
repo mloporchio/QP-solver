@@ -6,32 +6,43 @@
 */
 
 #include "Problem.hpp"
-#include "Initial.hpp"
 #include "Utils.hpp"
+#include <exception>
 #include <iostream>
 
 int main(int argc, char **argv) {
     // Read the parameters.
-    if (argc < 3) {
+    if (argc < 5) {
         std::cerr << "Usage:" << std::endl
-        << argv[0] << " <name> <max_iter>"
+        << argv[0] << " <name> <max_iter> <cst_tol> <opt_tol>"
         << std::endl;
         return 1;
     }
     // Name of the data set.
     std::string path(argv[1]);
-    // Maximum number of iterations.
+    // Read the parameters from the command line.
     unsigned int max_iter = ((unsigned int) atoi(argv[2]));
+    double tol_cnst = atof(argv[3]), tol_opt = atof(argv[4]);
     // Load the problem from file.
-    QProblem P = load(path);
+    QProblem P;
+    try {
+        P = load_problem(path);
+    }
+    // Check if something went wrong during the process.
+    catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
     // Set the initial point for the PGM.
-    arma::vec x_0 = initial_point_first(P);
+    arma::vec x_0 = P.initial_point();
     // Solve the problem.
-    QResult R = PGM(P, x_0, max_iter);
+    QResult R = PGM(P, x_0, max_iter, tol_cnst, tol_opt);
     // Print the results.
-    std::cout << "Solution\t: " << R.x.t();
-    std::cout << "Value\t\t: " << P.f(R.x) << std::endl;
-    std::cout << "Iteration\t: " << R.n_iter << std::endl;
-    std::cout << "Feasible\t: " << P.isFeasible(R.x) << std::endl;
+    std::cout
+    << "Solution\t= " << R.x.t()
+    << "Value\t\t= " << P.f(R.x) << std::endl
+    << "Iteration\t= " << R.n_iter << std::endl
+    << "Feasible\t= " << P.isFeasible(R.x, tol_cnst)
+    << std::endl;
     return 0;
 }

@@ -8,11 +8,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Absolute tolerance for feasibility checks.
-#define ABS_TOL 1E-12
-// Relative tolerance for feasibility checks.
-#define REL_TOL 1E-5
+// Number of decimal digits to write onto files.
+#define FP_PREC 16
 // Default value for the maximum number of iterations.
-// #define MAX_ITER 1000
+#define MAX_ITER 1000
+// When this macro is defined, debug mode is active.
+//#define DEBUG
 
 #endif

@@ -23,12 +23,24 @@ import sys
 import random
 import numpy as np
 
-def randomPSMatrix(n):
+def randomPSMatrix(n, ecc = 0.5):
     """
     Generates a random positive semidefinite n x n matrix.
     """
     Q = np.random.rand(n, n)
-    Q = np.matmul(Q, Q.T)
+    Q = np.matmul(Q.T, Q)
+    d, v = np.linalg.eig(Q)
+    # Sort the eigenvalues from smallest to largest (and the eigvecs accordingly)
+    idx = d.argsort()
+    d = d[idx]
+    v = v[:, idx]
+
+    # Adjust the eigenvalues to match the eccentricity required
+    l = d[0] * np.ones(n) + ( d[0] / (d[n-1] - d[0]) ) * (2 * ecc / (1 - ecc)) * (d - d[0] * np.ones(n))
+
+    # Create the new, adjusted, matrix
+    Q = np.matmul(np.matmul(v, np.diag(l)), v.T)
+
     return Q
 
 def randomFRMatrix(k, n):
@@ -51,8 +63,22 @@ def main():
     n = int(sys.argv[1])
     k = int(sys.argv[2])
     name = sys.argv[3]
+    print len(sys.argv)
+    if (len(sys.argv) > 4):
+        try:
+            ecc = float(sys.argv[4])
+        except ValueError:
+            ecc = None
+    else:
+        ecc = None
+    if (ecc is None):
+        print("Using default value for eccentricity: 0.5.")
+        ecc = 0.5
+    elif (ecc < 0 or ecc >= 1):
+        raise InputError('Eccentricity must be between 0 and 1 (excluded).')
+
     # Create the matrix Q.
-    Q = randomPSMatrix(n)
+    Q = randomPSMatrix(n, ecc)
     # Create the matrix A.
     A = randomFRMatrix(k, n)
     # Create the vector u.
