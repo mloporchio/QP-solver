@@ -29,7 +29,7 @@ double eps) {
 
 // This is the implementation of the projected gradient method.
 QResult PGM(QProblem &P, const arma::vec &x_0, arma::uword max_iter,
-double tol_cnst, double tol_opt) {
+double ctol, double dtol) {
     arma::uword k = 0;
     arma::vec x = x_0;
     arma::uvec act(x.n_elem, arma::fill::zeros);
@@ -38,16 +38,16 @@ double tol_cnst, double tol_opt) {
         double v = P.f(x);
         arma::vec g = P.gf(x);
         // Compute the active inequality constraints.
-        set_active(x, act, tol_cnst);
+        set_active(x, act, ctol);
         // Compute the projected direction.
         arma::vec d = project_block(P, act, g);
         // Stop if the norm of the direction is (nearly) zero.
-        if (arma::norm(d) <= tol_opt) break;
+        if (arma::norm(d) <= dtol) break;
         // Compute the maximum step to the nearest intersecting boundary.
-        double alpha, alpha_u = max_step(x, d, act, tol_cnst);
+        double alpha, alpha_u = max_step(x, d, act, ctol);
         // Then evaluate the slope.
         double slope = arma::dot(P.gf(x + alpha_u * d), d);
-        if (slope < -tol_cnst) alpha = alpha_u;
+        if (slope < -ctol) alpha = alpha_u;
         else alpha = -arma::dot(g, d) / (2 * arma::dot(d, P.Q * d));
         // Move to the next point.
         x = x + alpha * d;

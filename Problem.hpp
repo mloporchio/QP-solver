@@ -63,12 +63,15 @@ struct QResult {
     arma::uword n_iter; // Total number of iterations of the PGM.
 };
 
+// Computes the currently active constraints.
+void set_active(const arma::vec &x, arma::uvec &act, double eps);
+
 // Computes the maximum feasible stepsize.
 double max_step(const arma::vec &x, const arma::vec &d, const arma::uvec &act,
 double eps);
 
 // This is the implementation of the projected gradient method.
 QResult PGM(QProblem &P, const arma::vec &x_0, arma::uword max_iter,
-double tol_cnst, double tol_opt);
+double ctol, double dtol);
 
 #endif
