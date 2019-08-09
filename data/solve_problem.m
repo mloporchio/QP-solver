@@ -7,11 +7,8 @@
 %   to assess the quality of our implementation.
 %
 
-function [x, v] = solve_problem(name)
-    Q = csvread(strcat(name, '_Q.csv'), 0, 0);
-    A = csvread(strcat(name, '_A.csv'), 0, 0);
-    u = csvread(strcat(name, '_u.csv'), 0, 0);
-    b = ones(size(A, 1), 1);
-    z = zeros(size(Q, 1), 1);
-    [x, v] = quadprog(2*Q, u, [], [], A, b, z, []);
+function [x, v] = solve_problem(P)
+    b = ones(size(P.A, 1), 1);
+    z = zeros(size(P.Q, 1), 1);
+    [x, v] = quadprog(2 * P.Q, P.q, [], [], P.A, b, z, []);
 end

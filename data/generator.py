@@ -41,31 +41,46 @@ def randomPSMatrix(n, ecc = 0.5):
     d = d[idx]
     v = v[:, idx]
     # Adjust the eigenvalues to match the required eccentricity.
-    l = d[0] * np.ones(n) + (d[0] / (d[n-1] - d[0])) * (2 * ecc / (1 - ecc)) * (d - d[0] * np.ones(n))
+    r = 2 * ecc / (1 - ecc)
+    u = np.ones(n)
+    l = d[0] * u + (d[0] / (d[n-1] - d[0])) * r * (d - d[0] * u)
     # Create the new adjusted matrix.
     Q = np.matmul(np.matmul(v, np.diag(l)), v.T)
     return Q
+
+def random_partition(k, n):
+    """
+    Fast algorithm to generate a set of k positive integers whose sum is n.
+    Many thanks to: https://www.oipapio.com/question-909119
+    """
+    indices = [-1] + sorted(random.sample(range(n - 1), k - 1)) + [n - 1]
+    return [indices[i + 1] - indices[i] for i in range(k)]
 
 def randomFRMatrix(k, n):
     """
     Generates the k x n constraint matrix with full row rank.
     """
-    A = None
-    done = False
-    while (not done):
-        A = np.zeros((k, n))
-        w = [False for i in range(k)]
-        for j in range(0, n):
-            i = random.randint(0, k-1)
-            w[i] = True
-            A[i, j] = 1
-        done = np.all(w)
+    # Initialize the matrix with zeros.
+    A = np.zeros((k, n))
+    # Randomly shuffle the range of indices [0, n-1].
+    idx = range(n)
+    random.shuffle(idx)
+    # Generate an array of k positive integers that sum up to n.
+    # These integers represent the sizes of the partitions.
+    size = random_partition(k, n)
+    # For each partition, let s be its size.
+    # We have to read s elements from the shuffled indices and then
+    # set the corresponding positions to 1 into the matrix A.
+    low = 0
+    for i in range(k):
+        for j in range(low, low + size[i]): A[i, idx[j]] = 1
+        low += size[i]
     return A
 
 def main():
     # Process the input parameters.
     if (len(sys.argv) < 4):
-        print "Usage: " + sys.argv[0] + " <name> <n> <k> [<ecc>]"
+        print("Usage: " + sys.argv[0] + " <name> <n> <k> [<ecc>]")
         exit(1)
     # If there are at least three parameters, then parse them.
     name = sys.argv[1]
@@ -73,7 +88,7 @@ def main():
         n = int(sys.argv[2])
         k = int(sys.argv[3])
     except ValueError:
-        print "Error: could not parse one or more numeric arguments."
+        print("Error: could not parse one or more numeric arguments.")
         exit(1)
     # Check if an eccentricity has been provided.
     try:
@@ -81,7 +96,7 @@ def main():
     except IndexError, ValueError:
         ecc = None
     if (ecc is None):
-        print "Using default value for eccentricity = 0.5."
+        print("Using default value for eccentricity = 0.5.")
         ecc = 0.5
     # Check also if the eccentricity is in the range [0, 1).
     elif (ecc < 0 or ecc >= 1):
