@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     QResult R = PGM(P, x_0, max_iter, ctol, dtol);
     // Print the results.
     std::cout
-    << "Solution\t= " << R.x.t()
-    << "Value\t\t= " << P.f(R.x) << std::endl
+    /*<< "Solution\t= " << R.x.t()*/
+    << "Value\t\t= " << R.v << std::endl
     << "Iteration\t= " << R.n_iter << std::endl
     << "Feasible\t= " << P.isFeasible(R.x, ctol)
     << std::endl;

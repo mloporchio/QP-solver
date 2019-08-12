@@ -14,6 +14,10 @@
 // Checks if a given file exists.
 bool file_exists(std::string path);
 
+// Loads the constraints of the problem the corresponding file.
+cstlist_t load_constraints(const std::string &path,
+const std::string &delimiter = ",");
+
 // Loads problem data from a set of CSV files.
 // May throw an exception if any of the files does not exist
 // or if it can't be accessed.

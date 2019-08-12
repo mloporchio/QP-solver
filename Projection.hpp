@@ -11,14 +11,6 @@
 #include "Problem.hpp"
 
 // Computes the projection of a vector onto the subspace A_bar * d = 0.
-// This method uses Armadillo's solver for systems of linear equations.
-arma::vec project_auto(const arma::mat &A_bar, const arma::vec &x);
-
-// Computes the projection of a vector onto the subspace A_bar * d = 0.
-// This method explicitly computes the projection matrix.
-arma::vec project_mat(const arma::mat &A_bar, const arma::vec &x);
-
-// Computes the projection of a vector onto the subspace A_bar * d = 0.
 arma::vec project_block(QProblem &P, const arma::uvec &act, const arma::vec &g);
 
 // Projects the gradient onto the single block of coordinates.

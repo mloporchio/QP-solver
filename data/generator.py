@@ -56,12 +56,12 @@ def random_partition(k, n):
     indices = [-1] + sorted(random.sample(range(n - 1), k - 1)) + [n - 1]
     return [indices[i + 1] - indices[i] for i in range(k)]
 
-def randomFRMatrix(k, n):
+def random_constr(k, n):
     """
-    Generates the k x n constraint matrix with full row rank.
+    Generates a list of k constraints.
     """
-    # Initialize the matrix with zeros.
-    A = np.zeros((k, n))
+    # Initialize the result.
+    c = []
     # Randomly shuffle the range of indices [0, n-1].
     idx = range(n)
     random.shuffle(idx)
@@ -70,12 +70,21 @@ def randomFRMatrix(k, n):
     size = random_partition(k, n)
     # For each partition, let s be its size.
     # We have to read s elements from the shuffled indices and then
-    # set the corresponding positions to 1 into the matrix A.
+    # add the corresponding constraints to the result.
     low = 0
     for i in range(k):
-        for j in range(low, low + size[i]): A[i, idx[j]] = 1
+        l = []
+        for j in range(low, low + size[i]): l.append(idx[j])
+        c.append(sorted(l))
         low += size[i]
-    return A
+    return c
+
+def write_constr(filename, list):
+    """
+    Writes the constraint list to a file.
+    """
+    with open(filename, 'w') as f:
+        for s in list: f.write(','.join(str(x) for x in s) + '\n')
 
 def main():
     # Process the input parameters.
@@ -103,14 +112,14 @@ def main():
         raise InputError("Eccentricity must be in the range [0, 1).")
     # Create the matrix Q.
     Q = randomPSMatrix(n, ecc)
-    # Create the matrix A.
-    A = randomFRMatrix(k, n)
     # Create the vector u.
     u = np.random.rand(n, 1)
-    # Save the results to files.
+    # Create the constraint list.
+    c = random_constr(k, n)
+    # Save the results to separate files.
     np.savetxt(name + '_Q.csv', Q, fmt='%.6f', delimiter=',')
-    np.savetxt(name + '_A.csv', A, fmt='%.6f', delimiter=',')
     np.savetxt(name + '_u.csv', u, fmt='%.6f', delimiter=',')
+    write_constr(name + '_c.txt', c)
 
 if __name__ == '__main__':
     main()

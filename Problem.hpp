@@ -10,8 +10,15 @@
 
 #define ARMA_DONT_USE_WRAPPER
 #include <armadillo>
-#include <optional>
+#include <cmath>
 #include "Config.hpp"
+
+/*
+    The constraints of the problem are represented as a list of vectors.
+    Each vector contains the indices of the non-zero components of the
+    gradient of the constraint.
+*/
+typedef std::vector<arma::uvec> cstlist_t;
 
 /*
     This struct represents our quadratic problem:
@@ -25,8 +32,7 @@
 struct QProblem {
     arma::mat Q;
     arma::vec q;
-    arma::mat A; // k * n matrix of elements in {0, 1}
-    arma::vec b; // k * 1 vector of ones.
+    cstlist_t c;
 
     // Objective function.
     double f(const arma::vec &x) {
@@ -40,18 +46,21 @@ struct QProblem {
 
     // This method checks if a point is in the feasible region of the problem.
     bool isFeasible(const arma::vec &x, double eps) {
-        return (arma::approx_equal(A * x, b, "absdiff", eps) &&
-        arma::all(x >= -eps));
+        for (size_t i = 0; i < c.size(); i++) {
+            arma::uvec idx = c.at(i);
+            if (fabs(arma::accu(x(idx)) - 1) > eps) return false;
+        }
+        return arma::all(x >= -eps);
     }
 
     // Returns a feasible starting point where each component
     // of a partition S is equal to 1 / # of elements in S.
     arma::vec initial_point() {
         arma::vec result = arma::zeros(q.n_elem);
-        A.each_row([&](arma::rowvec &v) {
-            arma::uvec idx = arma::find(v > 0);
+        for (size_t i = 0; i < c.size(); i++) {
+            arma::uvec idx = c.at(i);
             result(idx).fill(1.0 / ((double) idx.n_elem));
-        });
+        }
         return result;
     }
 };

@@ -31,12 +31,9 @@ double eps) {
 QResult PGM(QProblem &P, const arma::vec &x_0, arma::uword max_iter,
 double ctol, double dtol) {
     arma::uword k = 0;
-    arma::vec x = x_0;
+    arma::vec x = x_0, g = P.gf(x);
     arma::uvec act(x.n_elem, arma::fill::zeros);
     while (k < max_iter) {
-        // Compute the function value and the gradient.
-        double v = P.f(x);
-        arma::vec g = P.gf(x);
         // Compute the active inequality constraints.
         set_active(x, act, ctol);
         // Compute the projected direction.
@@ -44,13 +41,14 @@ double ctol, double dtol) {
         // Stop if the norm of the direction is (nearly) zero.
         if (arma::norm(d) <= dtol) break;
         // Compute the maximum step to the nearest intersecting boundary.
-        double alpha, alpha_u = max_step(x, d, act, ctol);
-        // Then evaluate the slope.
-        double slope = arma::dot(P.gf(x + alpha_u * d), d);
-        if (slope < -ctol) alpha = alpha_u;
-        else alpha = -arma::dot(g, d) / (2 * arma::dot(d, P.Q * d));
+        double alpha_u = max_step(x, d, act, ctol);
+        // Then perform the line search.
+        arma::vec p = 2 * P.Q * d;
+        double alpha = fmin(alpha_u, -arma::dot(g, d) / arma::dot(d, p));
         // Move to the next point.
         x = x + alpha * d;
+        // Update the gradient.
+        g = g + alpha * p;
         k++;
     }
     return {x, P.f(x), k};
