@@ -16,6 +16,25 @@ bool file_exists(std::string path) {
 	return ((bool) std::ifstream(path.c_str()));
 }
 
+//
+pfile_t check_files(std::string path, bool sparse) {
+	// Build the names.
+    std::stringstream name1, name2, name3;
+    if (sparse) name1 << path << "_Q.dat";
+	else name1 << path << "_Q.csv";
+    name2 << path << "_u.csv";
+    name3 << path << "_c.dat";
+    std::string file1 = name1.str(), file2 = name2.str(), file3 = name3.str();
+    // Check if these files exist.
+    if (!file_exists(file1) || !file_exists(file2) || !file_exists(file3)) {
+		std::stringstream msg;
+		msg << "Error while loading data for problem: " << path << std::endl
+		<< "Please check if the corresponding files exist.";
+		throw std::runtime_error(msg.str());
+	}
+	return {file1, file2, file3};
+}
+
 // Loads the constraints of the problem the corresponding file.
 cstlist_t load_constraints(const std::string &path,
 const std::string &delimiter) {
@@ -40,30 +59,28 @@ const std::string &delimiter) {
 	return v;
 }
 
-// Loads problem data from a set of CSV files.
-// May throw an exception if any of the files does not exist
-// or cannot be accessed.
-QProblem load_problem(std::string path) {
-    // Build the names.
-    std::stringstream name1, name2, name3;
-    name1 << path << "_Q.csv";
-    name2 << path << "_u.csv";
-    name3 << path << "_c.txt";
-    std::string file1 = name1.str(), file2 = name2.str(), file3 = name3.str();
-    // Check if these files exist.
-    if (!file_exists(file1) || !file_exists(file2) || !file_exists(file3)) {
-		std::stringstream msg;
-		msg << "Error while loading data for problem: " << path << std::endl
-		<< "Please check if the corresponding files exist.";
-		throw std::runtime_error(msg.str());
-	}
+// Loads a problem with a dense matrix from disk.
+QProblem<arma::mat> load_dense(std::string path) {
+	pfile_t files = check_files(path, false);
     // Load Q and q from the CSV files.
-    arma::mat Q;
-	arma::vec q;
-    Q.load(file1, arma::csv_ascii);
-    q.load(file2, arma::csv_ascii);
+    arma::mat Q; arma::vec q;
+    Q.load(files.mat_f, arma::csv_ascii);
+    q.load(files.vec_f, arma::csv_ascii);
 	// Load the constraint list.
-	cstlist_t c = load_constraints(file3);
+	cstlist_t c = load_constraints(files.cst_f);
+	// Build and return the struct.
+    return {Q, q, c};
+}
+
+// Loads a problem with a sparse matrix from disk.
+QProblem<arma::sp_mat> load_sparse(std::string path) {
+	pfile_t files = check_files(path, true);
+    // Load Q and q from the CSV files.
+    arma::sp_mat Q; arma::vec q;
+	Q.load(files.mat_f, arma::coord_ascii);
+    q.load(files.vec_f, arma::csv_ascii);
+	// Load the constraint list.
+	cstlist_t c = load_constraints(files.cst_f);
 	// Build and return the struct.
     return {Q, q, c};
 }

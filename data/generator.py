@@ -27,14 +27,17 @@ import sys
 import random
 import numpy as np
 
-def randomPSMatrix(n, ecc = 0.5):
+def random_matrix(n, ecc = 0.5):
     """
     Generates a random positive semidefinite n x n matrix with a given
-    eccentricity. If no eccentricity is provided, a default value of 0.5
-    will be used.
+    eccentricity.
+
+    If no eccentricity is provided, a default value of 0.5 will be used.
     """
     Q = np.random.rand(n, n)
+    # This should guarantee that Q is also positive semidefinite.
     Q = np.matmul(Q.T, Q)
+    # Compute the eigenvalues and eigenvectors.
     d, v = np.linalg.eig(Q)
     # Sort the eigenvalues (and eigenvectors) from smallest to largest.
     idx = d.argsort()
@@ -91,7 +94,7 @@ def main():
     if (len(sys.argv) < 4):
         print("Usage: " + sys.argv[0] + " <name> <n> <k> [<ecc>]")
         exit(1)
-    # If there are at least three parameters, then parse them.
+    # If there are at least four parameters, then parse them.
     name = sys.argv[1]
     try:
         n = int(sys.argv[2])
@@ -111,15 +114,15 @@ def main():
     elif (ecc < 0 or ecc >= 1):
         raise InputError("Eccentricity must be in the range [0, 1).")
     # Create the matrix Q.
-    Q = randomPSMatrix(n, ecc)
+    Q = random_matrix(n, ecc)
     # Create the vector u.
     u = np.random.rand(n, 1)
     # Create the constraint list.
     c = random_constr(k, n)
     # Save the results to separate files.
-    np.savetxt(name + '_Q.csv', Q, fmt='%.6f', delimiter=',')
-    np.savetxt(name + '_u.csv', u, fmt='%.6f', delimiter=',')
-    write_constr(name + '_c.txt', c)
+    np.savetxt(name + '_Q.csv', Q, fmt='%.8f', delimiter=',')
+    np.savetxt(name + '_u.csv', u, fmt='%.8f', delimiter=',')
+    write_constr(name + '_c.dat', c)
 
 if __name__ == '__main__':
     main()

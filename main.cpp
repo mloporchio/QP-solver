@@ -12,9 +12,9 @@
 
 int main(int argc, char **argv) {
     // Read the parameters.
-    if (argc < 5) {
+    if (argc < 6) {
         std::cerr << "Usage:" << std::endl
-        << argv[0] << " <name> <max_iter> <cst_tol> <opt_tol>"
+        << argv[0] << " <name> <max_iter> <ctol> <dtol> <sparse>"
         << std::endl;
         return 1;
     }
@@ -23,26 +23,39 @@ int main(int argc, char **argv) {
     // Read the parameters from the command line.
     unsigned int max_iter = ((unsigned int) atoi(argv[2]));
     double ctol = atof(argv[3]), dtol = atof(argv[4]);
-    // Load the problem from file.
-    QProblem P;
-    try {
-        P = load_problem(path);
+    int sparse = atoi(argv[5]);
+    // Load and solve the problem.
+    QResult R;
+    bool feasible = false;
+    if (sparse) {
+        QProblem<arma::sp_mat> P;
+        try {P = load_sparse(path);}
+        catch (std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        arma::vec x_0 = P.initial_point();
+        R = P.PGM(x_0, max_iter, ctol, dtol);
+        feasible = P.is_feasible(R.x, ctol);
     }
-    // Check if something went wrong during the process.
-    catch (std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
+    else {
+        QProblem<arma::mat> P;
+        try {P = load_dense(path);}
+        catch (std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        arma::vec x_0 = P.initial_point();
+        R = P.PGM(x_0, max_iter, ctol, dtol);
+        feasible = P.is_feasible(R.x, ctol);
     }
-    // Set the initial point for the PGM.
-    arma::vec x_0 = P.initial_point();
-    // Solve the problem.
-    QResult R = PGM(P, x_0, max_iter, ctol, dtol);
     // Print the results.
     std::cout
-    /*<< "Solution\t= " << R.x.t()*/
     << "Value\t\t= " << R.v << std::endl
-    << "Iteration\t= " << R.n_iter << std::endl
-    << "Feasible\t= " << P.isFeasible(R.x, ctol)
-    << std::endl;
+    << "Iterations\t= " << R.n_iter << std::endl
+    << "Feasible\t= " << feasible << std::endl
+    << "Time\t\t= " << R.time << std::endl;
+    // Write the value history to a file.
+    vector_to_file(R.hist, path + "_val.csv");
     return 0;
 }
