@@ -69,7 +69,7 @@ QProblem<arma::mat> load_dense(std::string path) {
 	// Load the constraint list.
 	cstlist_t c = load_constraints(files.cst_f);
 	// Build and return the struct.
-    return {Q, q, c};
+    return QProblem<arma::mat>(Q, q, c);
 }
 
 // Loads a problem with a sparse matrix from disk.
@@ -82,7 +82,7 @@ QProblem<arma::sp_mat> load_sparse(std::string path) {
 	// Load the constraint list.
 	cstlist_t c = load_constraints(files.cst_f);
 	// Build and return the struct.
-    return {Q, q, c};
+    return QProblem<arma::sp_mat>(Q, q, c);
 }
 
 // Saves the content of a std::vector into a file.

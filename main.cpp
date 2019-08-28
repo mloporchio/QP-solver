@@ -27,27 +27,23 @@ int main(int argc, char **argv) {
     // Load and solve the problem.
     QResult R;
     bool feasible = false;
-    if (sparse) {
-        QProblem<arma::sp_mat> P;
-        try {P = load_sparse(path);}
-        catch (std::exception &e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
+    try {
+        if (sparse) {
+            QProblem<arma::sp_mat> P = load_sparse(path);
+            arma::vec x_0 = P.initial_point();
+            QResult R = P.PGM(x_0, max_iter, ctol, dtol);
+            feasible = P.is_feasible(R.x, ctol);
         }
-        arma::vec x_0 = P.initial_point();
-        R = P.PGM(x_0, max_iter, ctol, dtol);
-        feasible = P.is_feasible(R.x, ctol);
+        else {
+            QProblem<arma::mat> P = load_dense(path);
+            arma::vec x_0 = P.initial_point();
+            QResult R = P.PGM(x_0, max_iter, ctol, dtol);
+            feasible = P.is_feasible(R.x, ctol);
+        }
     }
-    else {
-        QProblem<arma::mat> P;
-        try {P = load_dense(path);}
-        catch (std::exception &e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
-        }
-        arma::vec x_0 = P.initial_point();
-        R = P.PGM(x_0, max_iter, ctol, dtol);
-        feasible = P.is_feasible(R.x, ctol);
+    catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
     }
     // Print the results.
     std::cout
