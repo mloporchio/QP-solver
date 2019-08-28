@@ -89,7 +89,7 @@ QProblem<arma::sp_mat> load_sparse(std::string path) {
 void vector_to_file(const std::vector<double> &v, std::string path) {
     std::ofstream output(path);
     for (double x : v) {
-        output << std::fixed << std::setprecision(FP_PREC) << x << std::endl;
+        output << std::fixed << std::setprecision(FP_FILE) << x << std::endl;
     }
     output.close();
 }

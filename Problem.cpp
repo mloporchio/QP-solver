@@ -63,8 +63,7 @@ arma::vec QProblem<T>::sub_proj(const arma::vec &g, const arma::uvec &act) {
     for (arma::uword i = 0; i < d.n_elem; i++) if (!act(i)) m += g(i);
     m /= (double)(n - nact);
     // Set the components of the result.
-    for (arma::uword i = 0; i < d.n_elem; i++)
-        d(i) = ((act(i)) ? 0 : m - g(i));
+    for (arma::uword i = 0; i < d.n_elem; i++) d(i) = ((act(i)) ? 0 : m - g(i));
     return d;
 }
 
@@ -123,7 +122,7 @@ double ctol, double dtol) {
     arma::uvec act(x.n_elem, arma::fill::zeros);
     std::vector<double> hist;
     while (k < max_iter) {
-        hist.push_back(f(x));
+        // hist.push_back(f(x));
         // Compute the active inequality constraints.
         set_active(x, act, ctol);
         // Compute the projected direction.

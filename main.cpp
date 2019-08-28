@@ -8,6 +8,7 @@
 #include "Problem.hpp"
 #include "Utils.hpp"
 #include <exception>
+#include <iomanip>
 #include <iostream>
 
 int main(int argc, char **argv) {
@@ -31,13 +32,13 @@ int main(int argc, char **argv) {
         if (sparse) {
             QProblem<arma::sp_mat> P = load_sparse(path);
             arma::vec x_0 = P.initial_point();
-            QResult R = P.PGM(x_0, max_iter, ctol, dtol);
+            R = P.PGM(x_0, max_iter, ctol, dtol);
             feasible = P.is_feasible(R.x, ctol);
         }
         else {
             QProblem<arma::mat> P = load_dense(path);
             arma::vec x_0 = P.initial_point();
-            QResult R = P.PGM(x_0, max_iter, ctol, dtol);
+            R = P.PGM(x_0, max_iter, ctol, dtol);
             feasible = P.is_feasible(R.x, ctol);
         }
     }
@@ -46,12 +47,12 @@ int main(int argc, char **argv) {
         return 1;
     }
     // Print the results.
-    std::cout
+    std::cout << std::fixed << std::setprecision(FP_STDOUT)
     << "Value\t\t= " << R.v << std::endl
     << "Iterations\t= " << R.n_iter << std::endl
     << "Feasible\t= " << feasible << std::endl
-    << "Time\t\t= " << R.time << std::endl;
+    << "Time\t\t= " << R.time << " us" << std::endl;
     // Write the value history to a file.
-    vector_to_file(R.hist, path + "_val.csv");
+    // vector_to_file(R.hist, path + "_val.csv");
     return 0;
 }
