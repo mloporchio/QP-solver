@@ -6,18 +6,21 @@
 %   using IJV or coordinate (COO) format. 
 %
 
-function S = load_sp_matrix(file, n)
+function S = load_sp_matrix(file)
     fid = fopen(file);
     tline = fgetl(fid);
-    % Create an empty n x n sparse matrix.
-    S = sparse(n, n);
+    k = 1;
+    i = [];
+    j = [];
+    v = [];
     while ischar(tline)
-        L = strsplit(tline);
-        i = str2double(L{1,1}) + 1;
-        j = str2double(L{1,2}) + 1;
-        v = str2double(L{1,3});
-        S(i, j) = v;
+        A = sscanf(tline, '%f', [3 1]);
+        i(k) = A(1) + 1;
+        j(k) = A(2) + 1;
+        v(k) = A(3);
+        k = k + 1;
         tline = fgetl(fid);
     end
+    S = sparse(i, j, v);
     fclose(fid);
 end

@@ -10,7 +10,7 @@ function P = load_problem(name, sparse)
     q = csvread(strcat(name, '_u.csv'), 0, 0);
     n = size(q, 1);
     if sparse
-        Q = load_sp_matrix(strcat(name, '_Q.dat'), n);
+        Q = load_sp_matrix(strcat(name, '_Q.dat'));
     else
         Q = csvread(strcat(name, '_Q.csv'), 0, 0);
     end
