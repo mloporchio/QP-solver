@@ -7,8 +7,9 @@
 %   to assess the quality of our implementation.
 %
 
-function [x, v] = solve_problem(P)
+function [x, v, it] = solve_problem(P)
     b = ones(size(P.A, 1), 1);
     z = zeros(size(P.Q, 1), 1);
-    [x, v] = quadprog(2 * P.Q, P.q, [], [], P.A, b, z, []);
+    [x, v, ~, out] = quadprog(2 * P.Q, P.q, [], [], P.A, b, z, [], [], []);
+    it = out.iterations;
 end

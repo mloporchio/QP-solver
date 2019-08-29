@@ -9,6 +9,7 @@
 #define PROBLEM_IMPL_
 
 #include "Problem.hpp"
+#include "Config.hpp"
 
 // Computes the currently active constraints.
 template<typename T>
@@ -122,7 +123,9 @@ double ctol, double dtol) {
     arma::uvec act(x.n_elem, arma::fill::zeros);
     std::vector<double> hist;
     while (k < max_iter) {
-        // hist.push_back(f(x));
+        #if LOG_VAL
+        hist.push_back(f(x));
+        #endif
         // Compute the active inequality constraints.
         set_active(x, act, ctol);
         // Compute the projected direction.

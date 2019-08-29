@@ -16,7 +16,7 @@ bool file_exists(std::string path) {
 	return ((bool) std::ifstream(path.c_str()));
 }
 
-//
+// Builds the full paths of the problem files and checks them.
 pfile_t check_files(std::string path, bool sparse) {
 	// Build the names.
     std::stringstream name1, name2, name3;

@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
     << "Feasible\t= " << feasible << std::endl
     << "Time\t\t= " << R.time << " us" << std::endl;
     // Write the value history to a file.
-    // vector_to_file(R.hist, path + "_val.csv");
+    #if LOG_VAL
+    vector_to_file(R.hist, path + "_val.csv");
+    #endif
     return 0;
 }

@@ -22,7 +22,7 @@ struct pfile_t {
 // Checks if a given file exists.
 bool file_exists(std::string path);
 
-//
+// Builds the full paths of the problem files and checks them.
 pfile_t check_files(std::string path, bool sparse);
 
 // Loads the constraints of the problem the corresponding file.
