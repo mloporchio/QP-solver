@@ -81,7 +81,15 @@ public:
     // of a partition S is equal to 1 / # of elements in S.
     arma::vec initial_point();
 
-    // This is the implementation of the projected gradient method.
+    /*
+        This is the implementation of the projected gradient method.
+        The following input parameters are required:
+
+            - x_0, the initial feasible point.
+            - max_iter, a limit on the number of iterations.
+            - ctol, constraint tolerance.
+            - dtol, norm tolerance.
+    */
     QResult PGM(const arma::vec &x_0, arma::uword max_iter,
     double ctol, double dtol);
 };

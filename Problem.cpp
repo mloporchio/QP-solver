@@ -113,6 +113,12 @@ arma::vec QProblem<T>::initial_point() {
 
 /*
     This is the implementation of the projected gradient method.
+    The following input parameters are required:
+
+        - x_0, the initial feasible point.
+        - max_iter, a limit on the number of iterations.
+        - ctol, constraint tolerance.
+        - dtol, norm tolerance.
 */
 template<typename T>
 QResult QProblem<T>::PGM(const arma::vec &x_0, arma::uword max_iter,

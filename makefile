@@ -1,5 +1,5 @@
 CXX=g++
-CXX_FLAGS= -std=c++17 -O2 -I ./armadillo-9.600.6/include
+CXX_FLAGS= -std=c++17 -O2 -I ./armadillo-9.700.2/include
 LD_FLAGS= -framework Accelerate
 
 .PHONY: cleanall
