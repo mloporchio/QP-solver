@@ -3,7 +3,7 @@
 %   Authors:    Matteo Loporchio, Davide Rucci
 %
 %   This function can be used to generate a problem.
-%   
+%   It can be used as an alternative to the Python script "generator.py".
 %   
 
 function P = generate_problem(n, k, ecc)

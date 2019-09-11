@@ -54,7 +54,7 @@ def random_matrix(n, ecc = 0.5):
 def random_partition(k, n):
     """
     Fast algorithm to generate a set of k positive integers whose sum is n.
-    Many thanks to: https://www.oipapio.com/question-909119
+    (Source: https://www.oipapio.com/question-909119)
     """
     indices = [-1] + sorted(random.sample(range(n - 1), k - 1)) + [n - 1]
     return [indices[i + 1] - indices[i] for i in range(k)]
