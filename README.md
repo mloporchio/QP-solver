@@ -1,6 +1,6 @@
 # QP-solver
 
-A convex quadratic program solver written in C++ and based on the classical <strong>projected gradient method</strong>.
+A convex quadratic program solver written in C++ and based on Rosen's <strong>projected gradient method</strong>.
 
 This tool aims to solve the following optimization problem
 whose feasible region is defined in terms of <a href="https://www.codecogs.com/eqnedit.php?latex=k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k" title="k" /></a> disjoint simplices in <a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{R}^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{R}^n" title="\mathbf{R}^n" /></a>:
